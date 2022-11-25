@@ -1,45 +1,79 @@
-using Microsoft.Azure.Documents;
-using Microsoft.Azure.Documents.Client;
+
+using KioskApi.Models;
+using SQLite;
 
 namespace KioskApi.Managers;
 public class DatabaseManager
 {    
     #region "Database Access"
-    private readonly IDocumentClient _documentClient;
     readonly string databaseId;
-    readonly string _collectionId;
+    private ILogger logger;
     public IConfiguration Configuration{get;}
-    public DatabaseManager(IDocumentClient documentClient, IConfiguration configuration, string collectionId){
-        _documentClient = documentClient;
+    private SQLiteAsyncConnection database;
+
+    public DatabaseManager(IConfiguration configuration, ILogger log){
         Configuration = configuration;
         databaseId = Configuration["DatabaseId"];
-        _collectionId = collectionId;
-
-        BuildCollection().Wait();
+        logger = log;
+        database = new SQLiteAsyncConnection(databaseId);
     }
 
-    public IQueryable<T> GetData<T>(int maxResults) where T : Models.IModel, new()
+    public async Task<IEnumerable<WeatherItem>> GetWeatherData(int maxResults)
     {
-        return _documentClient.CreateDocumentQuery<T>(
-            UriFactory.CreateDocumentCollectionUri(databaseId, _collectionId), 
-            new FeedOptions { MaxItemCount = maxResults});
+        var returnData = string.Empty;
+
+        try
+        {
+            var results = await database.QueryAsync<WeatherItem>($"SELECT * FROM WeatherItem");
+
+            return results;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error Getting WeatherItem.");
+            throw;
+        }
     }
 
-    public async void UpdateData<T>(T item) where T : Models.IModel, new()
+    public async Task<IEnumerable<IndoorStatusData>> GetIndoorStatusData()
     {
-        await _documentClient.ReplaceDocumentAsync(UriFactory.CreateDocumentUri(databaseId, _collectionId, item.Id), item);
-        
-    }
-    public async void AddData<T>(T item) where T : Models.IModel, new()
-    {
-        await _documentClient.CreateDocumentAsync(UriFactory.CreateDocumentCollectionUri(databaseId, _collectionId), item);
+        var returnData = string.Empty;
+
+        try
+        {
+            var results = await database.QueryAsync<IndoorStatusData>($"SELECT * FROM IndoorStatusData");
+
+            return results;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error Getting IndoorStatusData.");
+            throw;
+        }
     }
 
-    private async Task BuildCollection(){
-        await _documentClient.CreateDatabaseIfNotExistsAsync(new Database {Id = databaseId});
-        await _documentClient.CreateDocumentCollectionIfNotExistsAsync(
-            UriFactory.CreateDatabaseUri(databaseId), 
-            new DocumentCollection {Id = _collectionId});
+    public async void AddUpdateData<T>(T data)
+    {
+        try
+        {
+            await database.RunInTransactionAsync(tran =>
+            {
+                tran.InsertOrReplace(data);
+            });
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error Updating Data.");
+            throw;
+        }
     }
+
     #endregion
+
+    public void InitializeDatabase()
+    {     
+        database.CreateTableAsync<WeatherItem>();
+        database.CreateTableAsync<IndoorStatusData>();
+        database.CreateTableAsync<MoonData>();
+    }
 }

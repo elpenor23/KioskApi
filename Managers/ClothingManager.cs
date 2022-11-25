@@ -1,4 +1,3 @@
-using Microsoft.Azure.Documents;
 using KioskApi.Models;
 using KioskApi.Enums;
 
@@ -13,13 +12,15 @@ public class ClothingManager
     // private DatabaseManager clothingDbm;
     private IConfiguration Configuration { get; }
     private WeatherManager weatherManager;
-    public ClothingManager(IDocumentClient documentClient, IConfiguration configuration)
+    private ILogger logger;
+    public ClothingManager(IConfiguration configuration, ILogger log)
     {
         Configuration = configuration;
         // bodyPartsDbm = new DatabaseManager(documentClient, configuration, "BodyParts");
         // clothingDbm = new DatabaseManager(documentClient, configuration, "Clothing");
+        logger = log;
 
-        weatherManager = new WeatherManager(documentClient, configuration);
+        weatherManager = new WeatherManager(configuration, logger);
     }
 
     public async Task<IEnumerable<PersonsClothing>> GetCalcuatedClothing(

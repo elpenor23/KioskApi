@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.Documents;
 using KioskApi.Models;
 using KioskApi.Managers;
 
@@ -9,9 +8,11 @@ namespace KioskApi.Controllers;
 [ApiController]
 public class WeatherController : ControllerBase
 {
-    WeatherManager weatherManager;
-    public WeatherController(IDocumentClient documentClient, IConfiguration configuration){
-        weatherManager = new WeatherManager(documentClient, configuration);
+    private WeatherManager weatherManager;
+    private ILogger logger;
+    public WeatherController(IConfiguration configuration, ILogger log){
+        logger = log;
+        weatherManager = new WeatherManager(configuration, logger);
     }
 
     [HttpGet]

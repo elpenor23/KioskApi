@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.Documents;
 using KioskApi.Models;
 using KioskApi.Managers;
 
@@ -9,9 +8,11 @@ namespace KioskApi.Controllers;
 [ApiController]
 public class ClothingController : ControllerBase
 {
-    ClothingManager clothingManager;
-    public ClothingController(IDocumentClient documentClient, IConfiguration configuration){
-        clothingManager = new ClothingManager(documentClient, configuration);
+    private ClothingManager clothingManager;
+    private ILogger logger;
+    public ClothingController(IConfiguration configuration, ILogger log){
+        logger = log;
+        clothingManager = new ClothingManager(configuration, logger);
     }
 
     [HttpGet]

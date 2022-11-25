@@ -4,11 +4,12 @@ namespace KioskApi.Models;
 
 public class WeatherItem : IModel
 {
-    readonly string degree_sign = "°";
+    const string degree_sign = "°";
 
-    [Newtonsoft.Json.JsonProperty(PropertyName = "id")]
+    [SQLite.PrimaryKey]
     public string? Id { get; set; }
     public decimal? Lat { get; set; }
+    
     public decimal? Lon { get; set; }
 
     public DateTime? WeatherTime { get; set; }

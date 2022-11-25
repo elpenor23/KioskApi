@@ -1,4 +1,3 @@
-using Microsoft.Azure.Documents;
 using KioskApi.Models;
 
 namespace KioskApi.Managers;
@@ -6,11 +5,12 @@ public class MoonPhaseManager
 {
     private IConfiguration Configuration { get; }
     private WeatherManager weatherManager;
-    public MoonPhaseManager(IDocumentClient documentClient, IConfiguration configuration)
+    private ILogger logger;
+    public MoonPhaseManager( IConfiguration configuration, ILogger log)
     {
         Configuration = configuration;
-
-        weatherManager = new WeatherManager(documentClient, configuration);
+        logger = log;
+        weatherManager = new WeatherManager(configuration, logger);
     }
 
     public async Task<MoonData> GetMoonPhase(decimal lat, decimal lon)

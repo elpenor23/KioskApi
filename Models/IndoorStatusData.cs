@@ -16,7 +16,6 @@ public class IndoorStatusData : IModel
         this.LastSet = lastSet.Value;
     }
 
-    [Newtonsoft.Json.JsonProperty(PropertyName = "id")]
     public string? Id { get; }
     public string? Data { get; set; }
     public DateTime? LastSet { get; set; }

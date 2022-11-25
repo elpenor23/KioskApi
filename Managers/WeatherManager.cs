@@ -1,5 +1,4 @@
 using System.Net.Http.Headers;
-using Microsoft.Azure.Documents;
 using KioskApi.Models;
 
 namespace KioskApi.Managers;
@@ -7,36 +6,32 @@ public class WeatherManager
 {
     private DatabaseManager dbm;
     private IConfiguration Configuration{get;}
-    public WeatherManager(IDocumentClient documentClient, IConfiguration configuration){
+    private ILogger logger;
+    public WeatherManager(IConfiguration configuration, ILogger log){
         Configuration = configuration;
-        dbm = new DatabaseManager(documentClient, configuration, "WeatherCache");
+        logger = log;
+        dbm = new DatabaseManager(configuration, logger);
     }
     public async Task<WeatherItem> GetWeather(decimal lat, decimal lon){
 
         DateTime threeMinutesAgo = DateTime.Now.AddMinutes(-3);
         WeatherItem ReturnData = new WeatherItem();
-        var weatherData = dbm.GetData<WeatherItem>(100);
+        var weatherData = await dbm.GetWeatherData(100);
         
         //get cached data
         var data = weatherData.Where(x => x.Lat == lat && x.Lon == lon).ToList().FirstOrDefault();
 
         // if the data does not exist or is old we need to refresh the data
         if (data == null || data.LastRefreshed  < threeMinutesAgo) {
-            bool dataExists = true;
 
             if (data == null) { 
                 data = new WeatherItem();
-                dataExists = false;
             }
             
             var rawWeatherData = await GetRawWeatherAsync(lat, lon);
             data.ProcessRawWeatherData(rawWeatherData);
 
-            if (dataExists){
-                dbm.UpdateData<WeatherItem>(data);
-            }else{
-                dbm.AddData<WeatherItem>(data);
-            }
+            dbm.AddUpdateData(data);
             
         } else{
             data.Type = "cached";

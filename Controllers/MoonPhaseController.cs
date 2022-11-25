@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.Documents;
 using KioskApi.Models;
 using KioskApi.Managers;
 
@@ -9,10 +8,12 @@ namespace KioskApi.Controllers;
 [ApiController]
 public class MoonPhaseController : ControllerBase
 {
-    MoonPhaseManager moonPhaseManager;
-    public MoonPhaseController(IDocumentClient documentClient, IConfiguration configuration)
+    private MoonPhaseManager moonPhaseManager;
+    private ILogger logger;
+    public MoonPhaseController(IConfiguration configuration, ILogger log)
     {
-        moonPhaseManager = new MoonPhaseManager(documentClient, configuration);
+        logger = log;
+        moonPhaseManager = new MoonPhaseManager(configuration, logger);
     }
 
     [HttpGet]

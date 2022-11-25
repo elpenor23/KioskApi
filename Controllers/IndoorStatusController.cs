@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.Documents;
 using KioskApi.Models;
 using KioskApi.Managers;
 
@@ -9,10 +8,12 @@ namespace KioskApi.Controllers;
 [ApiController]
 public class IndoorStatusController : ControllerBase
 {
-    IndoorStatusManager indoorStatusManager;
-    public IndoorStatusController(IDocumentClient documentClient, IConfiguration configuration)
+    private IndoorStatusManager indoorStatusManager;
+    private ILogger logger;
+    public IndoorStatusController( IConfiguration configuration, ILogger log)
     {
-        indoorStatusManager = new IndoorStatusManager(documentClient, configuration);
+        logger = log;
+        indoorStatusManager = new IndoorStatusManager(configuration, logger);
     }
 
     [HttpGet]
@@ -25,11 +26,12 @@ public class IndoorStatusController : ControllerBase
     }
 
     [HttpPost]
-    // TODO: Figure out how to get this from the posted body
-    public async Task<ActionResult<IndoorStatusData>> PostTodoItem([FromBody]string thing_data)
+    public async Task<ActionResult<IndoorStatusData>> Post([FromBody]string status)
     {
-        Console.WriteLine("Status: " + thing_data);
-        //var data = await indoorStatusManager.SaveIndoorStatus(status);
+        Console.WriteLine("####################################################");
+        Console.WriteLine("Status: " + status);
+        Console.WriteLine("####################################################");
+        var data = await indoorStatusManager.SaveIndoorStatus(status);
 
         //return CreatedAtAction("GetTodoItem", new { id = todoItem.Id }, todoItem);
         return Ok();
