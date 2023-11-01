@@ -10,7 +10,7 @@ public class ClothingManager
     //       Used AppSettings for the data since it is pretty static
     // private DatabaseManager bodyPartsDbm;
     // private DatabaseManager clothingDbm;
-    private IConfiguration Configuration { get; }
+    private IConfiguration Configuration;
     private WeatherManager weatherManager;
     private ILogger logger;
     public ClothingManager(IConfiguration configuration, ILogger log)
@@ -56,7 +56,7 @@ public class ClothingManager
 
         var people = CreatePeople(arrayFeels, arrayIds, arrayName, arrayColor);
         var weather = await weatherManager.GetWeather(decimal.Parse(lat), decimal.Parse(lon));
-        var intensities = Configuration.GetSection("Intensities")?.GetChildren()?.Select(x => x.Value)?.ToList();
+        var intensities = Configuration.GetSection("Intensities")?.GetChildren()?.Select(x => x.Value)?.ToList() ?? new List<string?>();
 
         if (intensities == null) { return new List<PersonsClothing>(); }
 
@@ -67,7 +67,7 @@ public class ClothingManager
 
     }
 
-    private async Task<List<PersonsClothing>> CalculateClothing(List<Person> people, WeatherItem weather, List<string> intensities)
+    private async Task<List<PersonsClothing>> CalculateClothing(List<Person> people, WeatherItem weather, List<string?> intensities)
     {
         var calculatedClothing = new List<PersonsClothing>();
 
@@ -206,10 +206,10 @@ public class ClothingManager
         switch (feel)
         {
             case Feel.Cool:
-                feelAdjustment = decimal.Parse(Configuration["Adjustments:feel:cool"]);
+                feelAdjustment = decimal.Parse(Configuration["Adjustments:feel:cool"] ?? "0");
                 break;
             case Feel.Warm:
-                feelAdjustment = decimal.Parse(Configuration["Adjustments:feel:warm"]);
+                feelAdjustment = decimal.Parse(Configuration["Adjustments:feel:warm"] ?? "0");
                 break;
         }
 
@@ -222,13 +222,13 @@ public class ClothingManager
         switch (intensity)
         {
             case Intensity.Race:
-                intensityAdjustment = decimal.Parse(Configuration["Adjustments:intensity:race"]);
+                intensityAdjustment = decimal.Parse(Configuration["Adjustments:intensity:race"] ?? "0");
                 break;
             case Intensity.Workout:
-                intensityAdjustment = decimal.Parse(Configuration["Adjustments:intensity:hard_workout"]);
+                intensityAdjustment = decimal.Parse(Configuration["Adjustments:intensity:hard_workout"] ?? "0");
                 break;
             case Intensity.Long:
-                intensityAdjustment = decimal.Parse(Configuration["Adjustments:intensity:long_run"]);
+                intensityAdjustment = decimal.Parse(Configuration["Adjustments:intensity:long_run"] ?? "0");
                 break;
         }
 
@@ -245,13 +245,13 @@ public class ClothingManager
         switch (windType)
         {
             case WindType.Light:
-                windAdjustment = decimal.Parse(Configuration["Adjustments:wind:light_wind"]);
+                windAdjustment = decimal.Parse(Configuration["Adjustments:wind:light_wind"] ?? "0");
                 break;
             case WindType.Medium:
-                windAdjustment = decimal.Parse(Configuration["Adjustments:wind:windy"]);
+                windAdjustment = decimal.Parse(Configuration["Adjustments:wind:windy"] ?? "0");
                 break;
             case WindType.Heavy:
-                windAdjustment = decimal.Parse(Configuration["Adjustments:wind:heavy_wind"]);
+                windAdjustment = decimal.Parse(Configuration["Adjustments:wind:heavy_wind"] ?? "0");
                 break;
         }
 
@@ -263,12 +263,12 @@ public class ClothingManager
         WindType windType = WindType.None;
 
         //GET CONFIGS
-        decimal lightMin = decimal.Parse(Configuration["Adjustments:wind_speed:light_min"]);
-        decimal lightMax = decimal.Parse(Configuration["Adjustments:wind_speed:light_max"]);
-        decimal medMin = decimal.Parse(Configuration["Adjustments:wind_speed:wind_min"]);
-        decimal medMax = decimal.Parse(Configuration["Adjustments:wind_speed:wind_max"]);
-        decimal heavyMin = decimal.Parse(Configuration["Adjustments:wind_speed:heavy_min"]);
-        decimal heavyMax = decimal.Parse(Configuration["Adjustments:wind_speed:heavy_max"]);
+        decimal lightMin = decimal.Parse(Configuration["Adjustments:wind_speed:light_min"] ?? "0");
+        decimal lightMax = decimal.Parse(Configuration["Adjustments:wind_speed:light_max"] ?? "0");
+        decimal medMin = decimal.Parse(Configuration["Adjustments:wind_speed:wind_min"] ?? "0");
+        decimal medMax = decimal.Parse(Configuration["Adjustments:wind_speed:wind_max"] ?? "0");
+        decimal heavyMin = decimal.Parse(Configuration["Adjustments:wind_speed:heavy_min"] ?? "0");
+        decimal heavyMax = decimal.Parse(Configuration["Adjustments:wind_speed:heavy_max"] ?? "0");
 
         if (lightMin <= windSpeed && windSpeed <= lightMax)
         {
@@ -294,11 +294,11 @@ public class ClothingManager
                 switch (weather.CurrentMain)
                 {
                     case "Clear":
-                        timeOfDayAndConditionsAdjustment += decimal.Parse(Configuration["Adjustments:timeofday_precipitation:clear_day"]);
+                        timeOfDayAndConditionsAdjustment += decimal.Parse(Configuration["Adjustments:timeofday_precipitation:clear_day"] ?? "0");
                         break;
                     case "Clouds":
                     case "Mist":
-                        timeOfDayAndConditionsAdjustment += decimal.Parse(Configuration["Adjustments:timeofday_precipitation:partially_cloudy_day"]);
+                        timeOfDayAndConditionsAdjustment += decimal.Parse(Configuration["Adjustments:timeofday_precipitation:partially_cloudy_day"] ?? "0");
                         break;
                 }
                 break;
@@ -307,11 +307,11 @@ public class ClothingManager
                 switch (weather.CurrentMain)
                 {
                     case "Clear":
-                        timeOfDayAndConditionsAdjustment += decimal.Parse(Configuration["Adjustments:timeofday_precipitation:clear_dusk_dawn"]);
+                        timeOfDayAndConditionsAdjustment += decimal.Parse(Configuration["Adjustments:timeofday_precipitation:clear_dusk_dawn"] ?? "0");
                         break;
                     case "Clouds":
                     case "Mist":
-                        timeOfDayAndConditionsAdjustment += decimal.Parse(Configuration["Adjustments:timeofday_precipitation:partially_cloudy_dusk_dawn"]);
+                        timeOfDayAndConditionsAdjustment += decimal.Parse(Configuration["Adjustments:timeofday_precipitation:partially_cloudy_dusk_dawn"] ?? "0");
                         break;
                 }
                 break;
@@ -319,13 +319,13 @@ public class ClothingManager
                 switch (weather.CurrentMain)
                 {
                     case "Rain":
-                        timeOfDayAndConditionsAdjustment += decimal.Parse(Configuration["Adjustments:timeofday_precipitation:rain"]);
+                        timeOfDayAndConditionsAdjustment += decimal.Parse(Configuration["Adjustments:timeofday_precipitation:rain"] ?? "0");
                         break;
                     case "Drizzle":
-                        timeOfDayAndConditionsAdjustment += decimal.Parse(Configuration["Adjustments:timeofday_precipitation:light_rain"]);
+                        timeOfDayAndConditionsAdjustment += decimal.Parse(Configuration["Adjustments:timeofday_precipitation:light_rain"] ?? "0");
                         break;
                     case "Snow":
-                        timeOfDayAndConditionsAdjustment += decimal.Parse(Configuration["Adjustments:timeofday_precipitation:snow"]);
+                        timeOfDayAndConditionsAdjustment += decimal.Parse(Configuration["Adjustments:timeofday_precipitation:snow"] ?? "0");
                         break;
                 }
                 break;
@@ -356,7 +356,9 @@ public class ClothingManager
 
         if (bodyParts.Count == 0)
         {
-            bodyParts = await DefaultBodyParts();
+            //bodyParts = await DefaultBodyParts();
+            bodyParts = await Task.Run(() => DefaultBodyParts());
+
         }
 
         return bodyParts;
@@ -374,7 +376,7 @@ public class ClothingManager
         return fullList;
     }
 
-    private async Task<List<BodyPart>> DefaultBodyParts()
+    private List<BodyPart> DefaultBodyParts()
     {
         var bodyParts = new List<BodyPart>();
 
@@ -422,8 +424,8 @@ public class ClothingManager
         {
             var ci = new ClothingItem();
             ci.Id = item["id"];
-            ci.MinTemp = decimal.Parse(item["min_temp"]);
-            ci.MaxTemp = decimal.Parse(item["max_temp"]);
+            ci.MinTemp = decimal.Parse(item["min_temp"] ?? "0");
+            ci.MaxTemp = decimal.Parse(item["max_temp"] ?? "100");
             ci.Title = item["title"];
             ci.Special = item["special"];
             cl.Clothing.Add(ci);

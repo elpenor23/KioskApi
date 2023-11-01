@@ -43,10 +43,10 @@ public class WeatherManager
     private async Task<string> GetRawWeatherAsync(decimal lat, decimal lon)
     {
         string result = "[{}]";
-
+        
         using(var client = new HttpClient())
         {
-            string uri = String.Format(Configuration["WeatherApi:weather_req_url"], 
+            string uri = String.Format(Configuration["WeatherApi:weather_req_url"] ?? string.Empty, 
                 Configuration["WeatherApi:weather_api_token"], 
                 lat, 
                 lon, 

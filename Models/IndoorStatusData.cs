@@ -23,7 +23,7 @@ public class IndoorStatusData : IModel
     {
         get
         {
-            return LastSet?.ToString("yyyy-MM-ddTHH:mm:ss");
+            return (LastSet ?? DateTime.Now).ToString("yyyy-MM-ddTHH:mm:ss");
         }
     }
 }

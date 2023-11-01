@@ -45,10 +45,10 @@ public static class Enums
         return returnVal;
     }
 
-    public static Intensity ConvertStringToIntensity(string intensity){
+    public static Intensity ConvertStringToIntensity(string? intensity){
         Intensity returnVal = Intensity.Normal;
         
-        switch (intensity){
+        switch (intensity ?? "Easy"){
             case "Easy":
                 returnVal = Intensity.Easy;
                 break;

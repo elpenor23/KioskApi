@@ -13,7 +13,7 @@ public class DatabaseManager
 
     public DatabaseManager(IConfiguration configuration, ILogger log){
         Configuration = configuration;
-        databaseId = Configuration["DatabaseId"];
+        databaseId = Configuration["DatabaseId"] ?? string.Empty;
         logger = log;
         database = new SQLiteAsyncConnection(databaseId);
     }
